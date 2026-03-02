@@ -31,6 +31,13 @@ function parseInstances() {
   for (let i = 1; i <= 20; i++) {
     const url = getConfigValue(`GLUETUN_${i}_URL`, `gluetun_${i}_url`);
     if (!url) continue;
+    // Validate URL at startup (fail-fast)
+    try {
+      new URL(url);
+    } catch (err) {
+      console.error(`[startup] Invalid GLUETUN_${i}_URL: ${url}`);
+      process.exit(1);
+    }
     list.push({
       id: String(i),
       name: getConfigValue(`GLUETUN_${i}_NAME`, `gluetun_${i}_name`) || `Instance ${i}`,
@@ -42,10 +49,18 @@ function parseInstances() {
   }
   if (list.length === 0) {
     // Legacy single-instance fallback
+    const legacyUrl = getConfigValue('GLUETUN_CONTROL_URL', 'gluetun_control_url') || 'http://gluetun:8000';
+    // Validate URL at startup (fail-fast)
+    try {
+      new URL(legacyUrl);
+    } catch (err) {
+      console.error(`[startup] Invalid GLUETUN_CONTROL_URL: ${legacyUrl}`);
+      process.exit(1);
+    }
     list.push({
       id: '1',
       name: getConfigValue('GLUETUN_NAME', 'gluetun_name') || 'Gluetun',
-      url: (getConfigValue('GLUETUN_CONTROL_URL', 'gluetun_control_url') || 'http://gluetun:8000').replace(/\/$/, ''),
+      url: legacyUrl.replace(/\/$/, ''),
       apiKey:   getConfigValue('GLUETUN_API_KEY', 'gluetun_api_key'),
       user:     getConfigValue('GLUETUN_USER', 'gluetun_user'),
       password: getConfigValue('GLUETUN_PASSWORD', 'gluetun_password'),
@@ -133,6 +148,8 @@ async function gluetunFetch(instance, endpoint, method = 'GET', body = null) {
 }
 
 // --- Helper: aggregate health for one instance ---
+// Returns { timestamp, vpnStatus, publicIp, portForwarded, dnsStatus, vpnSettings, allFailed }
+// allFailed = true if ALL 5 checks failed (service is completely unreachable)
 async function fetchInstanceHealth(instance) {
   const results = await Promise.allSettled([
     gluetunFetch(instance, '/v1/vpn/status'),
@@ -145,7 +162,8 @@ async function fetchInstanceHealth(instance) {
   const [vpnStatus, publicIp, portForwarded, dnsStatus, vpnSettings] = results.map(r =>
     r.status === 'fulfilled' ? { ok: true, data: r.value } : { ok: false, error: 'Upstream error' }
   );
-  return { timestamp: new Date().toISOString(), vpnStatus, publicIp, portForwarded, dnsStatus, vpnSettings };
+  const allFailed = results.every(r => r.status === 'rejected');
+  return { timestamp: new Date().toISOString(), vpnStatus, publicIp, portForwarded, dnsStatus, vpnSettings, allFailed };
 }
 
 // --- Instance list endpoint ---
@@ -157,12 +175,22 @@ app.get('/api/instances', (req, res) => {
 app.get('/api/:instanceId/health', async (req, res) => {
   const instance = resolveInstance(req.params.instanceId);
   if (!instance) return res.status(400).json({ ok: false, error: 'Unknown instance ID' });
-  res.json(await fetchInstanceHealth(instance));
+  const health = await fetchInstanceHealth(instance);
+  // Return 503 if all upstream checks failed (service completely unreachable)
+  if (health.allFailed) {
+    return res.status(503).json({ ok: false, error: 'Service unavailable', ...health });
+  }
+  res.json({ ok: true, ...health });
 });
 
 // --- Legacy aggregate health (instance 1) ---
 app.get('/api/health', async (req, res) => {
-  res.json(await fetchInstanceHealth(instances[0]));
+  const health = await fetchInstanceHealth(instances[0]);
+  // Return 503 if all upstream checks failed (service completely unreachable)
+  if (health.allFailed) {
+    return res.status(503).json({ ok: false, error: 'Service unavailable', ...health });
+  }
+  res.json({ ok: true, ...health });
 });
 
 // --- Legacy individual proxy endpoints (instance 1) ---
