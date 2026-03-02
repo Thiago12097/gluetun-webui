@@ -154,7 +154,7 @@ app.get('/api/instances', (req, res) => {
 });
 
 // --- Per-instance health endpoint ---
-app.get('/api/:instanceId/health', readLimiter, async (req, res) => {
+app.get('/api/:instanceId/health', async (req, res) => {
   const instance = resolveInstance(req.params.instanceId);
   if (!instance) return res.status(400).json({ ok: false, error: 'Unknown instance ID' });
   res.json(await fetchInstanceHealth(instance));
